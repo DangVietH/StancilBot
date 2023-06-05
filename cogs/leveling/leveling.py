@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from core import Stancil
 from utilities import MenuPages, DefaultPageSource, SecondPageSource
-import vacefron
 import io
 from PIL import Image, ImageDraw, ImageFont
 
@@ -10,7 +9,6 @@ from PIL import Image, ImageDraw, ImageFont
 class Leveling(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
-        self.vacefron_client = vacefron.Client()
 
     @commands.command()
     async def rank(self, ctx: commands.Context, member: discord.Member = None):
