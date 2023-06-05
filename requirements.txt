@@ -1,0 +1,8 @@
+discord.py
+git+https://github.com/Rapptz/discord-ext-menus
+aiohttp
+python_dotenv
+PyNaCl
+jishaku
+asyncpg
+pillow
