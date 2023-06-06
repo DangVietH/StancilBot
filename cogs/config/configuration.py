@@ -96,7 +96,7 @@ class Configuration(commands.Cog):
     @commands.command(name="ban-message")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
     async def ban_message(self, ctx: commands.Context, *, message):
-        """Customize the ban message that will be sent to the member when they got banned"""
+        """Customize the ban message that will be dm to the member when they got banned"""
         await self.bot.db.execute(
             "UPDATE server SET ban_message = $1 WHERE id = $2",
             message,

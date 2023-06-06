@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS leveling (
     guild BIGINT,
     member BIGINT,
     level INTEGER,
-    xp INTEGER
+    xp INTEGER,
+    card_bg TEXT
 );
 
 

@@ -45,7 +45,10 @@ class Leveling(commands.Cog):
         IMAGE_WIDTH = 900
         IMAGE_HEIGHT = 250
 
-        img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
+        if data['card_bg'] is None:
+            img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
+        else:
+            img_link = data['card_bg']
 
         resp = await self.bot.session.get(img_link)
         image = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
@@ -140,3 +143,14 @@ class Leveling(commands.Cog):
 
         page = MenuPages(SecondPageSource(f"{ctx.guild.name} Role Rewards", menu_data), ctx)
         await page.start()
+
+    @commands.command(name="set-background")
+    async def set_background(self, ctx: commands.Context, *, link):
+        """Set custom background for your rankcard."""
+        await self.bot.db.execute(
+            "UPDATE leveling SET card_bg = $1 WHERE guild = $2 AND member = $3",
+            link,
+            ctx.guild.id,
+            ctx.author.id
+        )
+        await ctx.send("Custom rankcard background set.")
