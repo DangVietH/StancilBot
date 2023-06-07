@@ -334,7 +334,7 @@ class Configuration(commands.Cog):
             """
             INSERT INTO
             starboard_config(guild, sb_channel, amount, emoji, self_star, lock, del_sb_msg_if, nsfw, ignore_channel)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
             """,
             ctx.guild.id,
             channel_id,
