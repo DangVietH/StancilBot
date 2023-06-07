@@ -44,6 +44,14 @@ class Stancil(commands.Bot):
             activity=discord.Game(name="s!help"),
         )
 
+    @property
+    def invite(self):
+        return "https://discord.com/oauth2/authorize?client_id=1101829281765654528&permissions=8&scope=bot%20applications.commands"
+
+    @property
+    def support_server(self):
+        return "https://discord.gg/YkJY686d52"
+
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
 

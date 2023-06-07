@@ -6,6 +6,7 @@ from core import Stancil
 from cogs.info.help import CustomHelp
 from typing import Optional
 
+
 class Info(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
@@ -83,4 +84,7 @@ class Info(commands.Cog):
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
         embed.add_field(name="User's", value=f"{len(self.bot.users)} total\n{len(amount_of_bots)} bots")
-        await ctx.send(embed=embed)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='Invite', url=self.bot.invite))
+        view.add_item(discord.ui.Button(label='Support server', url=self.bot.support_server))
+        await ctx.send(embed=embed, view=view)
