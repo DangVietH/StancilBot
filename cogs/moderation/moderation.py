@@ -65,6 +65,8 @@ class Moderation(commands.Cog):
     async def mute(self, ctx: commands.Context, member: discord.Member, *, reason=None):
         """Mute a member"""
         mute_role_id = await self.bot.db.fetchval("SELECT mute_role FROM server WHERE id=$1", ctx.guild.id)
+        if mute_role_id is None:
+            return await ctx.send(f"You haven't set up a mute role. Use `{ctx.clean_prefix}mute-role` to set one")
         mute_role = ctx.guild.get_role(mute_role_id)
         await member.add_roles(mute_role, reason=reason)
         await ctx.send(f"{member.mention} has been muted for `{reason}`")

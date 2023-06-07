@@ -9,22 +9,13 @@ class GuildEvents(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        mute_role = await guild.create_role(
-            name="stancil muted",
-            permissions=discord.Permissions(
-                send_messages=False,
-                speak=False,
-                add_reactions=False,
-                stream=False
-            )
-        )
         await self.bot.db.execute(
             """
             INSERT INTO server(id, prefix, mute_role, config_role, mod_role, ban_message) 
             VALUES($1, $2, $3, $4, $5, $6)
             """,
             guild.id,
-            mute_role.id,
+            None,
             None,
             None,
             None,
