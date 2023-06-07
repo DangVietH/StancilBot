@@ -94,7 +94,7 @@ class Configuration(commands.Cog):
         await ctx.send("Prefix Reset back to `s!`")
 
     @commands.command(name="mute-role")
-    @commands.has_permissions(manage_role=True)
+    @commands.has_permissions(manage_roles=True)
     async def mute_role(self, ctx: commands.Context, role: discord.Role):
         await self.bot.db.execute(
             "UPDATE server SET mute_role = $1 WHERE id = $2",
