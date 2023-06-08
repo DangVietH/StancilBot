@@ -3,11 +3,87 @@ import discord
 from discord.ext import commands
 from core import Stancil
 import asyncio
+import re
+
+
+class TriviaButton(discord.ui.Button['TriviaView']):
+    def __init__(self, label, correct: bool):
+        super().__init__(style=discord.ButtonStyle.blurple, label=label)
+        self.correct = correct
+
+    async def callback(self, interaction: discord.Interaction):
+        view: TriviaView = self.view
+        return view.value == self.correct
+
+
+class TriviaView(discord.ui.View):
+    def __init__(self, ctx: commands.Context, option: list, answer):
+        super().__init__(timeout=30.0)
+        self.ctx = ctx
+        self.option = option
+        self.answer = answer
+        self.value = None
+
+        for o in self.option:
+            if o == answer:
+                value = True
+            else:
+                value = False
+            self.add_item(TriviaButton(o, value))
+
+    def get_value(self):
+        return self.value
+
+    async def interaction_check(self, interaction) -> bool:
+        if interaction.user == self.ctx.author:
+            return True
+        else:
+            await interaction.response.send_message("You can't use these buttons", ephemeral=True)
+            return False
 
 
 class Fun(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
+
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def trivia(self, ctx: commands.Context):
+        """Play some trivia"""
+        resp = await self.bot.session.get(f"https://opentdb.com/api.php?amount=1")
+        resp_json = await resp.json()
+
+        data = resp_json['results'][0]
+        options = [re.sub("&.*?;", "", k) for k in data["incorrect_answers"]]
+        correct_answer = re.sub("&.*?;", "", data["correct_answer"])
+        options.append(correct_answer)
+        random.shuffle(options)
+
+        view = TriviaView(ctx, options, correct_answer)
+
+        embed = discord.Embed()
+        embed.title = re.sub("&.*?;", "", data["question"])
+        embed.add_field(name="Catagory", value=data["category"])
+        embed.add_field(name="Difficulty", value=data["difficulty"])
+        msg = await ctx.send(embed=embed, view=view)
+        await view.wait()
+
+        if view.value is None:
+            embed.description = f"Timeout. The correct answer is {correct_answer}"
+            for child in view.children:
+                child.disabled = True
+            await msg.edit(embed=embed, view=view)
+        elif view.value is True:
+            embed.description = f"You're correct. The answer is **{correct_answer}**"
+            for child in view.children:
+                child.disabled = True
+            await msg.edit(embed=embed, view=view)
+        else:
+            embed.description = f"Wrong! The correct answer is **{correct_answer}**"
+            for child in view.children:
+                child.disabled = True
+            await msg.edit(embed=embed, view=view)
+
 
     @commands.command(aliases=["iqrate"])
     async def iq(self, ctx: commands.Context):
@@ -48,6 +124,7 @@ class Fun(commands.Cog):
         await ctx.send(f"**Bird Fact:** {data['fact']}")
 
     @commands.command(aliases=["cock", 'dong'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def pp(self, ctx: commands.Context, *, member: discord.Member = None):
         """Measure your pp"""
         member = member or ctx.author
@@ -85,6 +162,7 @@ class Fun(commands.Cog):
         await ctx.send(data['joke'])
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def pokedex(self, ctx: commands.Context, *, pokemon):
         """Get info about a Pokémon"""
         resp = await self.bot.session.get(
@@ -118,6 +196,7 @@ class Fun(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name="8ball")
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def _8ball(self, ctx: commands.Context, *, question):
         """Answering your questions"""
         answer = [
