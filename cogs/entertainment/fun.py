@@ -7,13 +7,17 @@ import re
 
 
 class TriviaButton(discord.ui.Button['TriviaView']):
-    def __init__(self, label, correct: bool):
+    def __init__(self, label, value: bool):
         super().__init__(style=discord.ButtonStyle.blurple, label=label)
-        self.correct = correct
+        self.value = value
 
     async def callback(self, interaction: discord.Interaction):
+        assert self.view is not None
         view: TriviaView = self.view
-        return view.value == self.correct
+        for child in view.children:
+            child.disabled = True
+        view.value = self.value
+        view.stop()
 
 
 class TriviaView(discord.ui.View):
@@ -30,9 +34,6 @@ class TriviaView(discord.ui.View):
             else:
                 value = False
             self.add_item(TriviaButton(o, value))
-
-    def get_value(self):
-        return self.value
 
     async def interaction_check(self, interaction) -> bool:
         if interaction.user == self.ctx.author:
@@ -75,15 +76,10 @@ class Fun(commands.Cog):
             await msg.edit(embed=embed, view=view)
         elif view.value is True:
             embed.description = f"You're correct. The answer is **{correct_answer}**"
-            for child in view.children:
-                child.disabled = True
             await msg.edit(embed=embed, view=view)
         else:
             embed.description = f"Wrong! The correct answer is **{correct_answer}**"
-            for child in view.children:
-                child.disabled = True
             await msg.edit(embed=embed, view=view)
-
 
     @commands.command(aliases=["iqrate"])
     async def iq(self, ctx: commands.Context):
