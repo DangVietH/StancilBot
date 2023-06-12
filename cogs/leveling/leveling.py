@@ -95,7 +95,7 @@ class Leveling(commands.Cog):
             img_link = data['card_bg']
 
         resp = await self.bot.session.get(img_link)
-        background = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
+        background = await resp.read()
 
         avatar_asset = member.display_avatar.replace(format='jpg', size=128)
         buffer_avatar = io.BytesIO(await avatar_asset.read())
