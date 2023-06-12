@@ -8,7 +8,7 @@ import io
 from PIL import Image, ImageDraw, ImageFont
 
 
-def rank_card_maker(member, member_data, rank, background, avatar):
+def rank_card_maker(member, level, xp, rank, background, avatar):
     image_width = 900
     image_height = 250
 
@@ -26,15 +26,15 @@ def rank_card_maker(member, member_data, rank, background, avatar):
     font_big = ImageFont.truetype('assets/font.ttf', 36)
     font_small = ImageFont.truetype('assets/font.ttf', 20)
 
-    needed_xp = 100 * 2 * ((1 / 2) * member_data['level'])
+    needed_xp = 100 * 2 * ((1 / 2) * level)
     draw.text((248, 48), f"{member}", fill=(225, 0, 92), font=font_big)
     draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
-    draw.text((248, 130), f"Level {member_data['level']}", fill=(225, 0, 92), font=font_small)
-    draw.text((641, 130), f"{member_data['xp']} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
+    draw.text((248, 130), f"Level {level}", fill=(225, 0, 92), font=font_small)
+    draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
 
     draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
 
-    bar_length = 245 + member_data['xp'] / needed_xp * 205
+    bar_length = 245 + xp / needed_xp * 205
     draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
     # read JPG from buffer to Image
@@ -82,12 +82,21 @@ class Leveling(commands.Cog):
             return await ctx.send("This member hasn't send a message in this server")
 
         rank = 0
+        lvl = 0
+        xp = data['xp']
         for record in await self.bot.db.fetch(
             "SELECT * FROM leveling WHERE guild=$1 ORDER BY xp DESC", ctx.guild.id
         ):
             rank += 1
             if record["member"] == member.id:
                 break
+
+        while True:
+            if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
+                break
+            lvl += 1
+
+        xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
 
         if data['card_bg'] is None:
             img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
@@ -105,7 +114,7 @@ class Leveling(commands.Cog):
         buffer_avatar.seek(0)
 
         # run in async executor
-        sync_func = functools.partial(rank_card_maker, member, data, rank, background, buffer_avatar)
+        sync_func = functools.partial(rank_card_maker, member, lvl, xp, rank, background, buffer_avatar)
         results = await self.bot.loop.run_in_executor(None, sync_func)
         await ctx.send(file=discord.File(results, 'rank.png'))
 
