@@ -1,9 +1,65 @@
+import functools
+
 import discord
 from discord.ext import commands
 from core import Stancil
 from utilities import MenuPages, DefaultPageSource, SecondPageSource
 import io
 from PIL import Image, ImageDraw, ImageFont
+
+
+def rank_card_maker(member, member_data, rank, background, avatar):
+    image_width = 900
+    image_height = 250
+
+    image = Image.open(io.BytesIO(background.convert("RGBA")))
+
+    image = image.resize((image_width, image_height))
+
+    rectangle_image = Image.new('RGBA', (image_width, image_height))
+    rectangle_draw = ImageDraw.Draw(rectangle_image)
+    rectangle_draw.rectangle((20, 20, image_width - 20, image_height - 20), fill=(0, 0, 0, 127))
+    image = Image.alpha_composite(image, rectangle_image)
+
+    draw = ImageDraw.Draw(image)
+
+    font_big = ImageFont.truetype('assets/font.ttf', 36)
+    font_small = ImageFont.truetype('assets/font.ttf', 20)
+
+    needed_xp = 100 * 2 * ((1 / 2) * member_data['level'])
+    draw.text((248, 48), f"{member}", fill=(225, 0, 92), font=font_big)
+    draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
+    draw.text((248, 130), f"Level {member_data['level']}", fill=(225, 0, 92), font=font_small)
+    draw.text((641, 130), f"{member_data['xp']} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
+
+    draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
+
+    bar_length = 245 + member_data['xp'] / needed_xp * 205
+    draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
+
+    # read JPG from buffer to Image
+    AVATAR_SIZE = 200
+    avatar_image = Image.open(avatar)
+    avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
+
+    circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
+    circle_draw = ImageDraw.Draw(circle_image)
+    circle_draw.ellipse((0, 0, AVATAR_SIZE, AVATAR_SIZE), fill=255)
+
+    x = 40
+    y = (image_height - AVATAR_SIZE) // 2
+    image.paste(avatar_image, (x, y), circle_image)
+
+    buffer = io.BytesIO()
+
+    # save PNG in buffer
+    image.save(buffer, format='PNG')
+
+    # move to beginning of buffer so `send()` it will read from beginning
+    buffer.seek(0)
+
+    # return data
+    return buffer
 
 
 class Leveling(commands.Cog):
@@ -26,8 +82,6 @@ class Leveling(commands.Cog):
             return await ctx.send("This member hasn't send a message in this server")
 
         rank = 0
-        lvl = 0
-        xp = data['xp']
         for record in await self.bot.db.fetch(
             "SELECT * FROM leveling WHERE guild=$1 ORDER BY xp DESC", ctx.guild.id
         ):
@@ -35,48 +89,14 @@ class Leveling(commands.Cog):
             if record["member"] == member.id:
                 break
 
-        while True:
-            if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
-                break
-            lvl += 1
-
-        xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
-
-        IMAGE_WIDTH = 900
-        IMAGE_HEIGHT = 250
-
         if data['card_bg'] is None:
             img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
         else:
             img_link = data['card_bg']
 
         resp = await self.bot.session.get(img_link)
-        image = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
+        background = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
 
-        image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
-
-        rectangle_image = Image.new('RGBA', (IMAGE_WIDTH, IMAGE_HEIGHT))
-        rectangle_draw = ImageDraw.Draw(rectangle_image)
-        rectangle_draw.rectangle((20, 20, IMAGE_WIDTH - 20, IMAGE_HEIGHT - 20), fill=(0, 0, 0, 127))
-        image = Image.alpha_composite(image, rectangle_image)
-
-        draw = ImageDraw.Draw(image)
-
-        font_big = ImageFont.truetype('assets/font.ttf', 36)
-        font_small = ImageFont.truetype('assets/font.ttf', 20)
-
-        needed_xp = 100 * 2 * ((1 / 2) * lvl)
-        draw.text((248, 48), f"{member}", fill=(225, 0, 92), font=font_big)
-        draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
-        draw.text((248, 130), f"Level {data['level']}", fill=(225, 0, 92), font=font_small)
-        draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
-
-        draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
-
-        bar_length = 245 + xp / needed_xp * 205
-        draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
-
-        AVATAR_SIZE = 200
         avatar_asset = member.display_avatar.replace(format='jpg', size=128)
         buffer_avatar = io.BytesIO(await avatar_asset.read())
 
@@ -84,27 +104,10 @@ class Leveling(commands.Cog):
         await avatar_asset.save(buffer_avatar)
         buffer_avatar.seek(0)
 
-        # read JPG from buffer to Image
-        avatar_image = Image.open(buffer_avatar)
-        avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
-
-        circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
-        circle_draw = ImageDraw.Draw(circle_image)
-        circle_draw.ellipse((0, 0, AVATAR_SIZE, AVATAR_SIZE), fill=255)
-
-        x = 40
-        y = (IMAGE_HEIGHT - AVATAR_SIZE) // 2
-        image.paste(avatar_image, (x, y), circle_image)
-
-        buffer = io.BytesIO()
-
-        # save PNG in buffer
-        image.save(buffer, format='PNG')
-
-        # move to beginning of buffer so `send()` it will read from beginning
-        buffer.seek(0)
-
-        await ctx.send(file=discord.File(buffer, 'rank.png'))
+        # run in async executor
+        sync_func = functools.partial(rank_card_maker, member, data, rank, background, buffer_avatar)
+        results = await self.bot.loop.run_in_executor(None, sync_func)
+        await ctx.send(file=discord.File(results, 'rank.png'))
 
     @commands.command(aliases=['top'])
     async def leaderboard(self, ctx: commands.Context):
