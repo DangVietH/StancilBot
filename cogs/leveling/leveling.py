@@ -12,7 +12,7 @@ def rank_card_maker(member, member_data, rank, background, avatar):
     image_width = 900
     image_height = 250
 
-    image = Image.open(io.BytesIO(background.convert("RGBA")))
+    image = Image.open(io.BytesIO(background)).convert("RGBA")
 
     image = image.resize((image_width, image_height))
 
