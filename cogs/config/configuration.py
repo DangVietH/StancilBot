@@ -44,10 +44,13 @@ class Confirm(discord.ui.View):
 
 class Configuration(commands.Cog):
     """Configuration settings for the bot in this server"""
-    emoji = "⚙️"
 
     def __init__(self, bot: Stancil):
         self.bot = bot
+
+    @property
+    def emoji(self):
+        return "⚙️"
 
     @commands.command(name="config-role")
     @commands.has_permissions(manage_guild=True)

@@ -5,11 +5,13 @@ from core import Stancil
 
 
 class Image(commands.Cog):
-    """Image Categories"""
-    emoji = "🖼"
 
     def __init__(self, bot: Stancil):
         self.bot = bot
+
+    @property
+    def emoji(self):
+        return "🖼"
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)

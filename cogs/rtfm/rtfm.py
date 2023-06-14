@@ -34,7 +34,6 @@ class RtfmListPageSource(menus.ListPageSource):
 
 
 class RTFM(commands.Cog):
-    emoji = "📚"
 
     def __init__(self, bot: Stancil):
         self.bot = bot
@@ -49,6 +48,10 @@ class RTFM(commands.Cog):
             ("acpg", "asyncpg"): "asyncpg",
         }
         self.cache = {}
+
+    @property
+    def emoji(self):
+        return "📚"
 
     async def build(self, target) -> None:
         url = self.targets[target]

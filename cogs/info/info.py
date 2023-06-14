@@ -13,6 +13,10 @@ class Info(commands.Cog):
         bot.help_command = CustomHelp()
         bot.help_command.cog = self
 
+    @property
+    def emoji(self):
+        return "ℹ️"
+
     @commands.hybrid_command()
     async def ping(self, ctx: commands.Context):
         """Show Bot Latency"""
@@ -35,7 +39,7 @@ class Info(commands.Cog):
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=member.color)
         embed.set_author(name=f"{member.display_name}", icon_url=member.display_avatar.url)
-        embed.add_field(name="Nick", value=member.nick, inline=False)
+        embed.add_field(name="Nickname", value=member.nick, inline=False)
         embed.add_field(name="ID", value=member.id)
         embed.add_field(name="Status", value=member.status)
         embed.add_field(name="In voice", value=None if not member.voice else member.voice.channel)

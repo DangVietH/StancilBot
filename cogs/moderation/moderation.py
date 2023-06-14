@@ -24,6 +24,10 @@ class Moderation(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
 
+    @property
+    def emoji(self):
+        return "<:mod:968445248252551178>"
+
     @commands.command()
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def warn(self, ctx: commands.Context, member: discord.Member, *, reason=None):

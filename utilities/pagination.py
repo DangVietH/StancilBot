@@ -5,13 +5,12 @@ import datetime
 
 class MenuPages(discord.ui.View):
     """Button Paginator"""
-    def __init__(self, source: menus.PageSource, ctx: commands.Context, *, compact: bool = False):
+    def __init__(self, source: menus.PageSource, ctx: commands.Context):
         super().__init__(timeout=120.0)
         self._source = source
         self.current_page = 0
         self.ctx = ctx
         self.message = None
-        self.compact = compact
         self.clear_items()
         self.fill_items()
 

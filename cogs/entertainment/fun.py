@@ -74,8 +74,14 @@ class TriviaView(discord.ui.View):
 
 
 class Fun(commands.Cog):
+    """Fun Commands"""
+
     def __init__(self, bot: Stancil):
         self.bot = bot
+
+    @property
+    def emoji(self):
+        return "😄"
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)

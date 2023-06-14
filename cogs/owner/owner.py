@@ -5,10 +5,13 @@ from core import Stancil
 
 class Owner(commands.Cog):
     """Only DvH can use it"""
-    emoji = "👑"
 
     def __init__(self, bot: Stancil):
         self.bot = bot
+
+    @property
+    def emoji(self):
+        return "👑"
 
     async def cog_check(self, ctx):
         return await self.bot.is_owner(ctx.author)

@@ -66,6 +66,10 @@ class Leveling(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
 
+    @property
+    def emoji(self):
+        return "📈"
+
     @commands.command()
     async def rank(self, ctx: commands.Context, member: discord.Member = None):
         """Show someone's xp"""

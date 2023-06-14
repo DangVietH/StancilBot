@@ -9,6 +9,10 @@ class Tag(commands.Cog):
     def __init__(self, bot: Stancil):
         self.bot = bot
 
+    @property
+    def emoji(self):
+        return "🏷️"
+
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['tags'])
     async def tag(self, ctx: commands.Context, *, tag_name=None):
         """Find a tag. Remember tags are CASE SENSITIVE"""

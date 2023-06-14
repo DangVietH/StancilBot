@@ -9,6 +9,10 @@ class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @property
+    def emoji(self):
+        return "📝"
+
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['reminder'])
     async def remindme(self, ctx: commands.Context, time, *, reminder):
         """Set your reminder. Time format includes: s, m, h, d"""
