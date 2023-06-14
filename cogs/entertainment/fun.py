@@ -7,33 +7,63 @@ import re
 
 
 class TriviaButton(discord.ui.Button['TriviaView']):
-    def __init__(self, label, value: bool):
-        super().__init__(style=discord.ButtonStyle.blurple, label=label)
+    def __init__(self, label, value: bool, click_color):
+        super().__init__(style=discord.ButtonStyle.grey, label=label)
+        self.click_color = click_color
         self.value = value
 
     async def callback(self, interaction: discord.Interaction):
+
+        self.style = self.click_color
+
         assert self.view is not None
         view: TriviaView = self.view
+
+        if self.value:
+            view.embed.description = f"Correct! The answer is **{view.answer}**"
+        else:
+            view.embed.description = f"Wrong! The correct answer is **{view.answer}**"
+
         for child in view.children:
             child.disabled = True
-        view.value = self.value
+
+        await interaction.response.edit_message(embed=view.embed, view=view)
         view.stop()
 
 
 class TriviaView(discord.ui.View):
-    def __init__(self, ctx: commands.Context, option: list, answer):
+    def __init__(self, ctx: commands.Context, question, category, difficulty, option: list, answer):
         super().__init__(timeout=30.0)
         self.ctx = ctx
+        self.question = question
+        self.category = category
+        self.difficulty = difficulty
         self.option = option
         self.answer = answer
-        self.value = None
+        self.embed = discord.Embed()
+        self.message = None
 
+    async def start(self) -> None:
+        # adding buttons
         for o in self.option:
-            if o == answer:
+            if o == self.answer:
                 value = True
+                click_color = discord.ButtonStyle.green
             else:
                 value = False
-            self.add_item(TriviaButton(o, value))
+                click_color = discord.ButtonStyle.red
+            self.add_item(TriviaButton(o, value, click_color))
+
+        self.embed.title = self.question
+        self.embed.add_field(name="Category", value=self.category)
+        self.embed.add_field(name="Difficulty", value=self.difficulty)
+        self.message = await self.ctx.send(embed=self.embed, view=self)
+
+    async def on_timeout(self) -> None:
+        self.embed.description = f"Timeout. The correct answer is {self.answer}"
+        for child in self.children:
+            child.disabled = True
+        await self.message.edit(embed=self.embed, view=self)
 
     async def interaction_check(self, interaction) -> bool:
         if interaction.user == self.ctx.author:
@@ -60,26 +90,15 @@ class Fun(commands.Cog):
         options.append(correct_answer)
         random.shuffle(options)
 
-        view = TriviaView(ctx, options, correct_answer)
-
-        embed = discord.Embed()
-        embed.title = re.sub("&.*?;", "", data["question"])
-        embed.add_field(name="Catagory", value=data["category"])
-        embed.add_field(name="Difficulty", value=data["difficulty"])
-        msg = await ctx.send(embed=embed, view=view)
-        await view.wait()
-
-        if view.value is None:
-            embed.description = f"Timeout. The correct answer is {correct_answer}"
-            for child in view.children:
-                child.disabled = True
-            await msg.edit(embed=embed, view=view)
-        elif view.value is True:
-            embed.description = f"You're correct. The answer is **{correct_answer}**"
-            await msg.edit(embed=embed, view=view)
-        else:
-            embed.description = f"Wrong! The correct answer is **{correct_answer}**"
-            await msg.edit(embed=embed, view=view)
+        view = TriviaView(
+            ctx,
+            re.sub("&.*?;", "", data["question"]),
+            data["category"],
+            data["difficulty"],
+            options,
+            correct_answer
+        )
+        await view.start()
 
     @commands.command(aliases=["iqrate"])
     async def iq(self, ctx: commands.Context):

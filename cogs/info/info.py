@@ -34,7 +34,7 @@ class Info(commands.Cog):
             activity = None
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=member.color)
-        embed.set_author(name=f"{member}", icon_url=member.display_avatar.url)
+        embed.set_author(name=f"{member.display_name}", icon_url=member.display_avatar.url)
         embed.add_field(name="Nick", value=member.nick, inline=False)
         embed.add_field(name="ID", value=member.id)
         embed.add_field(name="Status", value=member.status)

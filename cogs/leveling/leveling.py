@@ -114,7 +114,7 @@ class Leveling(commands.Cog):
         buffer_avatar.seek(0)
 
         # run in async executor
-        sync_func = functools.partial(rank_card_maker, member, lvl, xp, rank, background, buffer_avatar)
+        sync_func = functools.partial(rank_card_maker, member.display_name, lvl, xp, rank, background, buffer_avatar)
         results = await self.bot.loop.run_in_executor(None, sync_func)
         await ctx.send(file=discord.File(results, 'rank.png'))
 
