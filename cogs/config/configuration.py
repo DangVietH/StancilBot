@@ -187,9 +187,9 @@ class Configuration(commands.Cog):
         )
         await ctx.send(f"Level up message updated to ```{text}```")
 
-    @level.command(name="set-level-channel")
+    @level.command(name="set-channel")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_channels=True))
-    async def set_level_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
+    async def level_set_channel(self, ctx: commands.Context, channel: discord.TextChannel = None):
         """Set level up announcement channel"""
         channel = channel or ctx.channel
         await self.bot.db.execute(
@@ -199,9 +199,9 @@ class Configuration(commands.Cog):
         )
         await ctx.send(f"Level up announcement channel set to {channel.mention}")
 
-    @level.command(name="unset-level-channel")
+    @level.command(name="unset-channel")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_channels=True))
-    async def unset_level_channel(self, ctx: commands.Context):
+    async def level_unset_channel(self, ctx: commands.Context):
         """Reset back to level up messages responding below member's message"""
         await self.bot.db.execute(
             "UPDATE level_config SET lvl_up_channel = $1 WHERE guild = $2",

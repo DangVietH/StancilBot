@@ -44,6 +44,11 @@ class TriviaView(discord.ui.View):
         self.message = None
 
     async def start(self) -> None:
+        # create embed
+        self.embed.title = self.question
+        self.embed.add_field(name="Category", value=self.category)
+        self.embed.add_field(name="Difficulty", value=self.difficulty)
+
         # adding buttons
         for o in self.option:
             if o == self.answer:
@@ -54,9 +59,6 @@ class TriviaView(discord.ui.View):
                 click_color = discord.ButtonStyle.red
             self.add_item(TriviaButton(o, value, click_color))
 
-        self.embed.title = self.question
-        self.embed.add_field(name="Category", value=self.category)
-        self.embed.add_field(name="Difficulty", value=self.difficulty)
         self.message = await self.ctx.send(embed=self.embed, view=self)
 
     async def on_timeout(self) -> None:
