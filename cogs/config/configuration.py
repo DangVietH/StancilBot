@@ -313,7 +313,7 @@ class Configuration(commands.Cog):
         embed = discord.Embed(title="Starboard Configuration for this Server")
         embed.add_field(name="Channel", value=data['sb_channel'])
         embed.add_field(name="Amount", value=data['amount'])
-        embed.add_field(name="Emoji", value=data['emoji'])
+        embed.add_field(name="Emoji", value=data['emoji'] or "⭐️")
         embed.add_field(name="Self Star", value=data['self_star'])
         embed.add_field(name="Allow NSFW", value=data['nsfw'])
         embed.add_field(name="Ignored Channel", value=ig_c_list)
