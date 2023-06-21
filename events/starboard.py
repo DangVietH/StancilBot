@@ -204,26 +204,11 @@ class Starboard(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageUpdateEvent):
-        guild_data = await self.bot.db.fetchrow(
-            "SELECT * FROM starboard_config WHERE guild=$1",
-            payload.guild_id
-        )
-        message_stats = await self.bot.db.fetchrow(
-            "SELECT * FROM starboard_message WHERE message=$1",
-            payload.message_id
-        )
-
-        if not message_stats:
-            return
-
         await self.bot.db.execute(
-            "DELETE FROM starboard_message WHERE guild=$1",
+            "DELETE FROM starboard_message WHERE message=$1 and guild=$2",
+            payload.message_id,
             payload.guild_id
         )
-        if guild_data['del_sb_msg_if'] is True:
-            sb_channel = self.bot.get_channel(guild_data['sb_channel'])
-            sb_message = await sb_channel.fetch_message(message_stats['sb_message'])
-            await sb_message.delete()
 
 
 async def setup(bot: Stancil):

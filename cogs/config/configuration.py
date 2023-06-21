@@ -295,7 +295,29 @@ class Configuration(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['sb'])
     async def starboard(self, ctx: commands.Context):
         """Configure starboard system for your server"""
-        await ctx.send_help(ctx.command)
+        data = await self.bot.db.fetchrow("SELECT * FROM starboard_config WHERE guild=$1", ctx.guild.id)
+        if not data:
+            return await ctx.send_help(ctx.command)
+        ignored_channels = await self.bot.db.fetchval(
+            "SELECT ignore_channel FROM level_config WHERE guild = $1",
+            ctx.guild.id
+        )
+        ig_c_list = ""
+        if len(ignored_channels) <= 0:
+            ig_c_list = "None"
+        else:
+            for c in ignored_channels:
+                channel_id = ctx.guild.get_channel(int(c))
+                ig_c_list += f"{channel_id.mention}, "
+
+        embed = discord.Embed(title="Starboard Configuration for this Server")
+        embed.add_field(name="Channel", value=data['sb_channel'])
+        embed.add_field(name="Amount", value=data['amount'])
+        embed.add_field(name="Emoji", value=data['emoji'])
+        embed.add_field(name="Self Star", value=data['self_star'])
+        embed.add_field(name="Allow NSFW", value=data['nsfw'])
+        embed.add_field(name="Ignored Channel", value=ig_c_list)
+        await ctx.send(embed=embed)
 
     @starboard.command(name="enable")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
@@ -336,14 +358,13 @@ class Configuration(commands.Cog):
         await self.bot.db.execute(
             """
             INSERT INTO
-            starboard_config(guild, sb_channel, amount, emoji, self_star, lock, del_sb_msg_if, nsfw, ignore_channel)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            starboard_config(guild, sb_channel, amount, emoji, self_star, lock, nsfw, ignore_channel)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
             """,
             ctx.guild.id,
             channel_id,
             amount,
             None,
-            False,
             False,
             False,
             False,
@@ -466,31 +487,6 @@ class Configuration(commands.Cog):
                 ctx.guild.id
             )
             await msg.edit(content=f"NSFW disabled", view=None)
-
-    @starboard.command(name="delete-if")
-    @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
-    async def starboard_delete_if(self, ctx: commands.Context):
-        """Toggle delete starboard message if original message was deleted"""
-        view = Confirm(ctx)
-        msg = await ctx.send("Do you want the starboard message auto-deleted if the original message was deleted?", view=view)
-
-        await view.wait()
-        if view.value is None:
-            await msg.edit(content="You take too long to respond!", view=None)
-        elif view.value:
-            await self.bot.db.execute(
-                "UPDATE starboard_config SET del_sb_msg_if = $1 WHERE guild = $2",
-                True,
-                ctx.guild.id
-            )
-            await msg.edit(content=f"Delete if og message is deleted enabled", view=None)
-        else:
-            await self.bot.db.execute(
-                "UPDATE starboard_config SET del_sb_msg_if = $1 WHERE guild = $2",
-                False,
-                ctx.guild.id
-            )
-            await msg.edit(content=f"Delete if og message is deleted disabled", view=None)
 
     @starboard.command(name="ignore-channel")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_channels=True))

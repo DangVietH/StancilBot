@@ -56,7 +56,6 @@ CREATE TABLE IF NOT EXISTS starboard_config (
     emoji TEXT,
     self_star BOOL,
     lock BOOL,
-    del_sb_msg_if BOOL,
     nsfw BOOL,
     ignore_channel BIGINT ARRAY
 );
