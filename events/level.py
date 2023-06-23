@@ -76,9 +76,9 @@ class Level(commands.Cog):
 
             await channel.send(guild_data['lvl_up_text'].format(
                 mention=message.author.mention,
-                name=message.author.name,
+                name=message.author.display_name,
                 server=message.guild.name,
-                username=message.author,
+                username=message.author.name,
                 level=data['level'] + 1,
                 xp=data['xp']
             ))

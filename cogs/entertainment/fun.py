@@ -266,4 +266,4 @@ class Fun(commands.Cog):
         await asyncio.sleep(2)
         await msg.edit(content="Report to discord for violating TOS")
         await asyncio.sleep(2)
-        await msg.edit(content=f"Finish hacking {member}")
+        await msg.edit(content=f"Finish hacking {member.name}")

@@ -131,7 +131,7 @@ class Tag(commands.Cog):
         if not data:
             return await ctx.send("Tag Not Found. Remember tags are CASE SENSITIVE")
         embed = discord.Embed(title=f"{tag_name} Info")
-        embed.add_field(name="Owner", value=ctx.guild.get_member(data['owner']))
+        embed.add_field(name="Owner", value=ctx.guild.get_member(data['owner']).display_name)
         embed.add_field(name="Usage", value=data['stats'])
         embed.add_field(name="Create at", value=f"<t:{int(datetime.datetime.timestamp(data['create_at']))}>")
         await ctx.send(embed=embed)
@@ -176,7 +176,7 @@ class Tag(commands.Cog):
                 )
             )
 
-        page = MenuPages(SecondPageSource(f"{member} Tags", menu_data), ctx)
+        page = MenuPages(SecondPageSource(f"{member.display_name} Tags", menu_data), ctx)
         await page.start()
 
     @tag.command(name="leaderboard")

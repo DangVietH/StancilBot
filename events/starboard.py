@@ -6,7 +6,7 @@ from core import Stancil
 # starboard embed generator
 def sb_embed_generator(message: discord.Message):
     embed = discord.Embed(color=discord.Color.yellow(), timestamp=message.created_at)
-    embed.set_author(name=f"{message.author}", icon_url=message.author.display_avatar.url)
+    embed.set_author(name=f"{message.author.display_name}", icon_url=message.author.display_avatar.url)
     embed.add_field(name="Source", value=f"[Jump]({message.jump_url})")
     embed.set_footer(text=f"ID: {message.id}")
 

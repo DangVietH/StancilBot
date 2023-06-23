@@ -88,17 +88,17 @@ class Owner(commands.Cog):
             await ctx.send('Invalid status')
         await ctx.message.add_reaction('👌')
 
-    @commands.group(invoke_without_command=True, case_insensitive=True)
-    async def sync(self, ctx: commands.Context):
-        """Sync application commands to a guild"""
-        self.bot.tree.copy_global_to(guild=ctx.guild)
-        slash_list = await self.bot.tree.sync(guild=ctx.guild)
-        await ctx.send(f'Successfully synced {len(slash_list)} commands')
+    @commands.command()
+    async def sync(self, ctx: commands.Context, *, guild=None):
+        """Sync application commands"""
+        if guild is None or guild == "n".lower():
+            slash_list = await self.bot.tree.sync(guild=None)
+        elif guild == "y".lower():
+            self.bot.tree.copy_global_to(guild=ctx.guild)
+            slash_list = await self.bot.tree.sync(guild=ctx.guild)
+        else:
+            return await ctx.send("Incorrect value. There's only `y` and `n`")
 
-    @sync.command(name='global')
-    async def sync_global(self, ctx: commands.Context):
-        """Sync application commands to all guild"""
-        slash_list = await self.bot.tree.sync(guild=None)
         await ctx.send(f'Successfully synced {len(slash_list)} commands')
 
     @commands.command()

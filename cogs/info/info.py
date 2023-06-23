@@ -38,7 +38,7 @@ class Info(commands.Cog):
             activity = None
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=member.color)
-        embed.set_author(name=f"{member.display_name}", icon_url=member.display_avatar.url)
+        embed.set_author(name=f"{member.name}", icon_url=member.display_avatar.url)
         embed.add_field(name="Nickname", value=member.nick, inline=False)
         embed.add_field(name="ID", value=member.id)
         embed.add_field(name="Status", value=member.status)
@@ -49,7 +49,7 @@ class Info(commands.Cog):
         embed.add_field(name="Create at", value=f"<t:{int(member.created_at.timestamp())}:R>")
         embed.add_field(name="Join at", value=f"<t:{int(member.joined_at.timestamp())}:R>")
         embed.set_thumbnail(url=member.display_avatar.url)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
+        embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
     @commands.hybrid_command()
@@ -76,10 +76,10 @@ class Info(commands.Cog):
         for x in self.bot.users:
             if x.bot:
                 amount_of_bots.append(x)
-        embed = discord.Embed(title="Bot Information")
-        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
-        embed.add_field(name="Developer", value=f"DvH#9980")
-        embed.add_field(name="Version", value="v0.0.1-alpha")
+        embed = discord.Embed()
+        embed.set_author(name="Bot Information", icon_url=self.bot.user.avatar.url)
+        embed.add_field(name="Developer", value=f"dvh69")
+        embed.add_field(name="Version", value="v0.5.0-alpha")
         embed.add_field(name="Written in", value="Python 3.10.0")
         embed.add_field(name="Library",
                         value=f"[discord.py {discord.__version__}](https://github.com/Rapptz/discord.py)")
