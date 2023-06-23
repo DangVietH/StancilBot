@@ -38,11 +38,11 @@ class Info(commands.Cog):
             activity = None
 
         embed = discord.Embed(
-            title=member.name,
+            title=member.display_name,
             timestamp=ctx.message.created_at,
             color=member.color
         )
-        embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
+        embed.set_author(name=member.name, icon_url=member.display_avatar.url)
         embed.add_field(name="Nickname", value=member.nick, inline=False)
         embed.add_field(name="ID", value=member.id)
         embed.add_field(name="Status", value=member.status)

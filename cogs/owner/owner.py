@@ -89,11 +89,11 @@ class Owner(commands.Cog):
         await ctx.message.add_reaction('👌')
 
     @commands.command()
-    async def sync(self, ctx: commands.Context, *, guild=None):
+    async def sync(self, ctx: commands.Context, *, current_guild=None):
         """Sync application commands"""
-        if guild is None or guild == "n".lower():
+        if current_guild is None or current_guild.lower() == "n":
             slash_list = await self.bot.tree.sync(guild=None)
-        elif guild == "y".lower():
+        elif current_guild.lower() == "y":
             self.bot.tree.copy_global_to(guild=ctx.guild)
             slash_list = await self.bot.tree.sync(guild=ctx.guild)
         else:
