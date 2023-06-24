@@ -134,7 +134,7 @@ class Configuration(commands.Cog):
             """,
             ctx.guild.id,
             5,
-            "🎉 {mention} has reached level **{level}**!!🎉",
+            None,
             None,
             [],
             [],

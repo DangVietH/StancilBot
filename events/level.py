@@ -74,7 +74,8 @@ class Level(commands.Cog):
             else:
                 channel = self.bot.get_channel(guild_data['lvl_up_channel'])
 
-            await channel.send(guild_data['lvl_up_text'].format(
+            level_up_msg = guild_data['lvl_up_text'] or "🎉 {mention} has reached level **{level}**!!🎉"
+            await channel.send(level_up_msg.format(
                 mention=message.author.mention,
                 name=message.author.display_name,
                 server=message.guild.name,
