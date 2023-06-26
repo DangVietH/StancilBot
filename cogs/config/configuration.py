@@ -125,7 +125,7 @@ class Configuration(commands.Cog):
             return await ctx.send_help(ctx.command)
 
         ignored_channels = await self.bot.db.fetchval(
-            "SELECT level_config FROM level_config WHERE guild = $1",
+            "SELECT ignore_channel FROM level_config WHERE guild = $1",
             ctx.guild.id
         )
         ig_c_list = ""
