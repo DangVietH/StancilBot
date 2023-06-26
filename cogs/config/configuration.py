@@ -135,6 +135,7 @@ class Configuration(commands.Cog):
             for c in ignored_channels:
                 channel_id = ctx.guild.get_channel(int(c))
                 ig_c_list += f"{channel_id.mention}, "
+            ig_c_list = ig_c_list[:-2]
 
         embed = discord.Embed(title="Leveling Configuration for this Server")
         embed.add_field(name="Announcement Channel", value=data['lvl_up_channel'])
@@ -332,6 +333,7 @@ class Configuration(commands.Cog):
             for c in ignored_channels:
                 channel_id = ctx.guild.get_channel(int(c))
                 ig_c_list += f"{channel_id.mention}, "
+            ig_c_list = ig_c_list[:-2]
 
         embed = discord.Embed(title="Starboard Configuration for this Server")
         embed.add_field(name="Channel", value=data['sb_channel'])
