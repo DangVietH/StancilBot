@@ -142,6 +142,8 @@ class Tag(commands.Cog):
         data = await self.bot.db.fetch(
             "SELECT * FROM tag WHERE guild=$1 ORDER BY name", ctx.guild.id
         )
+        if not data:
+            return await ctx.send("There's no tags in this server.")
 
         menu_data = []
         num = 0
@@ -165,6 +167,9 @@ class Tag(commands.Cog):
             "SELECT * FROM tag WHERE guild=$1 AND owner=$2 ORDER BY name", ctx.guild.id, member.id
         )
 
+        if not data:
+            return await ctx.send("This member does not have a tag.")
+
         menu_data = []
         num = 0
         for d in data:
@@ -185,6 +190,8 @@ class Tag(commands.Cog):
         data = await self.bot.db.fetch(
             "SELECT * FROM tag WHERE guild=$1 ORDER BY stats", ctx.guild.id
         )
+        if not data:
+            return await ctx.send("There's no tags in this server.")
 
         menu_data = []
         num = 0

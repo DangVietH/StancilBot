@@ -128,6 +128,8 @@ class Leveling(commands.Cog):
         data = await self.bot.db.fetch(
             "SELECT * FROM leveling WHERE guild=$1 ORDER BY xp DESC", ctx.guild.id
         )
+        if not data:
+            return await ctx.send("It seems that the level system is not enabled in this server.")
 
         menu_data = []
         rank = 0
@@ -153,6 +155,8 @@ class Leveling(commands.Cog):
             "SELECT role_id FROM level_config WHERE guild = $1",
             ctx.guild.id
         )
+        if not role_level:
+            return await ctx.send("No role rewards configured for this server")
         menu_data = []
         for i in range(len(role_level)):
             menu_data.append((f"**{role_level[i]}**", ctx.guild.get_role(int(role_id[i])).mention))

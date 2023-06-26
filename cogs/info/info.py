@@ -40,7 +40,7 @@ class Info(commands.Cog):
     async def whois(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         """Display member info"""
         member = member or ctx.author
-        if member.activity is not None:
+        if member.activity:
             activity = member.activity.name
         else:
             activity = None

@@ -120,7 +120,30 @@ class Configuration(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True)
     async def level(self, ctx: commands.Context):
         """Configure leveling for your server"""
-        await ctx.send_help(ctx.command)
+        data = await self.bot.db.fetchrow("SELECT * FROM starboard_config WHERE guild=$1", ctx.guild.id)
+        if not data:
+            return await ctx.send_help(ctx.command)
+
+        ignored_channels = await self.bot.db.fetchval(
+            "SELECT level_config FROM starboard_config WHERE guild = $1",
+            ctx.guild.id
+        )
+        ig_c_list = ""
+        if not ignored_channels:
+            ig_c_list = "None"
+        else:
+            for c in ignored_channels:
+                channel_id = ctx.guild.get_channel(int(c))
+                ig_c_list += f"{channel_id.mention}, "
+
+        embed = discord.Embed(title="Leveling Configuration for this Server")
+        embed.add_field(name="Announcement Channel", value=data['lvl_up_channel'])
+        embed.add_field(name="XP per message", value=data['xp'])
+        embed.add_field(name="Level up text",
+                        value=f"```{data['lvl_up_text'] or '🎉 {mention} has reached level **{level}**!!🎉'}```",
+                        inline=False)
+        embed.add_field(name="Ignored Channel", value=ig_c_list)
+        await ctx.send(embed=embed)
 
     @level.command(name="enable")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
@@ -299,7 +322,7 @@ class Configuration(commands.Cog):
         if not data:
             return await ctx.send_help(ctx.command)
         ignored_channels = await self.bot.db.fetchval(
-            "SELECT ignore_channel FROM level_config WHERE guild = $1",
+            "SELECT ignore_channel FROM starboard_config WHERE guild = $1",
             ctx.guild.id
         )
         ig_c_list = ""
@@ -438,7 +461,7 @@ class Configuration(commands.Cog):
         )
         await ctx.send(f"Starboard emoji set too {emoji}.")
 
-    @starboard.command(name="self-star")
+    @starboard.command(name="selfstar")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
     async def starboard_self_star(self, ctx: commands.Context):
         """Toggle selfstar for starboard"""
