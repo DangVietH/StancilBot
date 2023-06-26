@@ -143,7 +143,7 @@ class Configuration(commands.Cog):
             lvl_channel = None
 
         embed = discord.Embed(title="Leveling Configuration for this Server")
-        embed.add_field(name="Announcement Channel", value=data['lvl_up_channel'])
+        embed.add_field(name="Announcement Channel", value=lvl_channel)
         embed.add_field(name="XP per message", value=data['xp'])
         embed.add_field(name="Level up text",
                         value=f"```{data['lvl_up_text'] or '🎉 {mention} has reached level **{level}**!!🎉'}```",
@@ -331,9 +331,9 @@ class Configuration(commands.Cog):
             "SELECT ignore_channel FROM starboard_config WHERE guild = $1",
             ctx.guild.id
         )
-        ig_c_list = None
+        ig_c_list = ""
         if not ignored_channels:
-            ig_c_list = "None"
+            ig_c_list = None
         else:
             for c in ignored_channels:
                 channel_id = ctx.guild.get_channel(int(c))
