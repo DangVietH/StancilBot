@@ -120,7 +120,7 @@ class Configuration(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True)
     async def level(self, ctx: commands.Context):
         """Configure leveling for your server"""
-        data = await self.bot.db.fetchrow("SELECT * FROM starboard_config WHERE guild=$1", ctx.guild.id)
+        data = await self.bot.db.fetchrow("SELECT * FROM level_config WHERE guild=$1", ctx.guild.id)
         if not data:
             return await ctx.send_help(ctx.command)
 
