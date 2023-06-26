@@ -29,6 +29,14 @@ class Info(commands.Cog):
 
     @commands.hybrid_command()
     @app_commands.describe(member="Choose member")
+    async def avatar(self, ctx: commands.Context, member: Optional[discord.Member] = None):
+        """Show member avatar"""
+        member = member or ctx.author
+        embed = discord.Embed(title=member.name, color=member.color).set_image(url=member.display_avatar.url)
+        await ctx.send(embed=embed)
+
+    @commands.hybrid_command()
+    @app_commands.describe(member="Choose member")
     async def whois(self, ctx: commands.Context, member: Optional[discord.Member] = None):
         """Display member info"""
         member = member or ctx.author

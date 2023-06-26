@@ -1,8 +1,23 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import datetime
 from utilities import time_converter
 from utilities import DefaultPageSource, MenuPages
+
+
+class LyricPageSource(menus.ListPageSource):
+    def __init__(self, title, url, thumbnail, data):
+        self.title = title
+        self.url = url
+        self.thumbnail = thumbnail
+        super().__init__(data, per_page=20)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=self.title, color=menu.ctx.bot.embed_color, url=self.url)
+        embed.description = "\n".join([part for part in entries])
+        embed.set_thumbnail(url=self.thumbnail)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class Utils(commands.Cog):
@@ -65,4 +80,24 @@ class Utils(commands.Cog):
             ))
 
         page = MenuPages(DefaultPageSource(f"Your Reminder", menu_data), ctx)
+        await page.start()
+
+    @commands.command(aliases=['lyrc', 'lyric'])
+    async def lyrics(self, ctx, *, song):
+        """Show the lyrics of a song"""
+        await ctx.channel.typing()
+        resp = await self.bot.session.get(
+            f"https://some-random-api.ml/others/lyrics", params={"title": song}
+        )
+        data = await resp.json()
+
+        if data.get('error'):
+            return await ctx.send(f"Error: {data['error']}")
+
+        pag_data = []
+        for chunk in data['lyrics'].split('\n'):
+            pag_data.append(chunk)
+        page = MenuPages(
+            LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pag_data),
+            ctx)
         await page.start()
