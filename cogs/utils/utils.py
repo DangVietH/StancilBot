@@ -87,7 +87,7 @@ class Utils(commands.Cog):
         """Show the lyrics of a song"""
         await ctx.channel.typing()
         resp = await self.bot.session.get(
-            f"https://some-random-api.ml/others/lyrics", params={"title": song}
+            f"https://some-random-api.com/others/lyrics", params={"title": song}
         )
         data = await resp.json()
 
