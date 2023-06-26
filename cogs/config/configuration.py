@@ -303,7 +303,7 @@ class Configuration(commands.Cog):
             ctx.guild.id
         )
         ig_c_list = ""
-        if len(ignored_channels) <= 0:
+        if not ignored_channels:
             ig_c_list = "None"
         else:
             for c in ignored_channels:
