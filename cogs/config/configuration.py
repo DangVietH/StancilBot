@@ -130,12 +130,17 @@ class Configuration(commands.Cog):
         )
         ig_c_list = ""
         if not ignored_channels:
-            ig_c_list = "None"
+            ig_c_list = None
         else:
             for c in ignored_channels:
                 channel_id = ctx.guild.get_channel(int(c))
                 ig_c_list += f"{channel_id.mention}, "
             ig_c_list = ig_c_list[:-2]
+
+        if data['lvl_up_channel']:
+            lvl_channel = ctx.guild.get_channel(data['lvl_up_channel']).mention
+        else:
+            lvl_channel = None
 
         embed = discord.Embed(title="Leveling Configuration for this Server")
         embed.add_field(name="Announcement Channel", value=data['lvl_up_channel'])
@@ -326,7 +331,7 @@ class Configuration(commands.Cog):
             "SELECT ignore_channel FROM starboard_config WHERE guild = $1",
             ctx.guild.id
         )
-        ig_c_list = ""
+        ig_c_list = None
         if not ignored_channels:
             ig_c_list = "None"
         else:
@@ -336,7 +341,7 @@ class Configuration(commands.Cog):
             ig_c_list = ig_c_list[:-2]
 
         embed = discord.Embed(title="Starboard Configuration for this Server")
-        embed.add_field(name="Channel", value=data['sb_channel'])
+        embed.add_field(name="Channel", value=ctx.guild.get_channel(data['sb_channel']).mention)
         embed.add_field(name="Amount", value=data['amount'])
         embed.add_field(name="Emoji", value=data['emoji'] or "⭐️")
         embed.add_field(name="Self Star", value=data['self_star'])
