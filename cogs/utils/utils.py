@@ -1,8 +1,10 @@
 import discord
+from discord import app_commands
 from discord.ext import commands, menus
 import datetime
 from utilities import time_converter
 from utilities import DefaultPageSource, MenuPages
+from core import Stancil
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -21,14 +23,15 @@ class LyricPageSource(menus.ListPageSource):
 
 
 class Utils(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Stancil):
         self.bot = bot
 
     @property
     def emoji(self):
         return "📝"
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['reminder'])
+    @commands.hybrid_group(aliases=['reminder'])
+    @app_commands.describe(time="When you will be reminded", reminder="The task you want to be reminded")
     async def remindme(self, ctx: commands.Context, time, *, reminder):
         """Set your reminder. Time format includes: s, m, h, d"""
 
@@ -83,7 +86,7 @@ class Utils(commands.Cog):
         await page.start()
 
     @commands.command(aliases=['lyrc', 'lyric'])
-    async def lyrics(self, ctx, *, song):
+    async def lyrics(self, ctx: commands.Context, *, song):
         """Show the lyrics of a song"""
         await ctx.channel.typing()
         resp = await self.bot.session.get(
