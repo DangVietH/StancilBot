@@ -30,7 +30,7 @@ class Utils(commands.Cog):
     def emoji(self):
         return "📝"
 
-    @commands.hybrid_group(aliases=['reminder'])
+    @commands.hybrid_group(aliases=['reminder'], fallback='set')
     @app_commands.describe(time="When you will be reminded", reminder="The task you want to be reminded")
     async def remindme(self, ctx: commands.Context, time, *, reminder):
         """Set your reminder. Time format includes: s, m, h, d"""
