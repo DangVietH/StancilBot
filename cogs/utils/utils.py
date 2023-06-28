@@ -52,11 +52,11 @@ class Utils(commands.Cog):
         await ctx.send(f"⏰ Reminder set! Reminder id: `{ctx.message.id}`")
 
     @remindme.command(name="delete")
-    async def remindme_delete(self, ctx: commands.Context, reminder_id):
+    async def remindme_delete(self, ctx: commands.Context, reminder_id: int):
         """Delete your reminder"""
         data = await self.bot.db.fetchrow(
             "SELECT * FROM remindme WHERE id=$1 AND users=$2",
-            int(reminder_id),
+            reminder_id,
             ctx.author.id
         )
         if not data:
