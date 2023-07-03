@@ -65,7 +65,8 @@ class Role(commands.Cog):
         for i in range(len(emojis)):
             if str(payload.emoji) == emojis[i]:
                 role = guild.get_role(int(roles[i]))
-                await payload.member.remove_roles(role)
+                member = await guild.fetch_member(payload.user_id)
+                await member.remove_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent):
