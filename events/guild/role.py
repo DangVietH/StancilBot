@@ -74,8 +74,3 @@ class Role(commands.Cog):
         )
         if stats == 'DELETE 0':
             return
-
-
-async def setup(bot: Stancil):
-    await bot.add_cog(Role(bot))
-

@@ -44,7 +44,3 @@ class GuildEvents(commands.Cog):
             "DELETE FROM starboard_message WHERE guild=$1",
             guild.id
         )
-
-
-async def setup(bot: Stancil):
-    await bot.add_cog(GuildEvents(bot))

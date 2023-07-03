@@ -6,3 +6,4 @@ PyNaCl
 jishaku
 asyncpg
 pillow
+better-ipc
