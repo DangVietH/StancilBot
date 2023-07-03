@@ -363,7 +363,8 @@ class Configuration(commands.Cog):
 
         await msg.edit(content="What will be the embed description", embed=embed)
         embed_desc = await self.bot.wait_for('message', check=check)
-        embed.description, em_desc = embed_desc.content
+        desc = embed_desc.content
+        embed.description = desc
         await ctx.channel.purge(limit=1)
 
         await msg.edit(content="What will be the embed color (Hex color only. If you want no color, type `skip`)", embed=embed)
@@ -403,7 +404,7 @@ class Configuration(commands.Cog):
             ctx.guild.id,
             False,
             title,
-            em_desc,
+            desc,
             emojis,
             roles
         )
