@@ -117,9 +117,6 @@ class Starboard(commands.Cog):
         if not self.bot.get_guild(payload.guild_id):
             return
 
-        if payload.member.bot:
-            return
-
         sb_config_data = await self.bot.db.fetchrow(
             "SELECT * FROM starboard_config WHERE guild=$1",
             payload.guild_id

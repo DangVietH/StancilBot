@@ -39,8 +39,6 @@ class Role(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        if payload.member.bot:
-            return
 
         data = await self.bot.db.fetchrow(
             "SELECT * FROM role WHERE message=$1",
