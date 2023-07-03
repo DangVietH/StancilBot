@@ -353,15 +353,16 @@ class Configuration(commands.Cog):
             )
             return
         channel = self.bot.get_channel(channel_id)
+        await ctx.channel.purge(limit=1)
 
         await msg.edit(content=f"Alright, the message will be sent to {channel.mention}.\nNow let's setup the embed message. What will be the title of the embed?")
         embed_title = await self.bot.wait_for('message', check=check)
-        embed = discord.Embed(title=embed_title).set_footer(text="This is what the embed will look like")
+        embed = discord.Embed(title=inspect.cleandoc(embed_title)).set_footer(text="This is what the embed will look like")
         await ctx.channel.purge(limit=1)
 
         await msg.edit(content="What will be the embed description", embed=embed)
         embed_desc = await self.bot.wait_for('message', check=check)
-        embed.description = embed_desc
+        embed.description = inspect.cleandoc(embed_desc)
         await ctx.channel.purge(limit=1)
 
         await msg.edit(content="What will be the embed color (Hex color only. If you want no color, type `skip`)", embed=embed)
