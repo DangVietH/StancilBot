@@ -370,8 +370,8 @@ class Configuration(commands.Cog):
         if color_hex.content.lower() == "skip":
             hex_val = 0
         else:
-            hex_val = color_hex
-        embed.color = int(hex_val, 16)
+            hex_val = int(color_hex, 16)
+        embed.color = hex_val
         await ctx.channel.purge(limit=1)
 
         await msg.edit(content=inspect.cleandoc("""
