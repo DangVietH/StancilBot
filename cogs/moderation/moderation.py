@@ -21,6 +21,8 @@ def has_mod_role():
 
 
 class Moderation(commands.Cog):
+    """Moderation commands"""
+
     def __init__(self, bot: Stancil):
         self.bot = bot
 

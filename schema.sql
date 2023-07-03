@@ -67,3 +67,14 @@ CREATE TABLE IF NOT EXISTS starboard_message (
     guild BIGINT,
     amount INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS role (
+    message BIGINT PRIMARY KEY,
+    guild BIGINT,
+    button BOOL,
+    embed_title TEXT,
+    embed_desc TEXT,
+    emojis TEXT ARRAY,
+    roles BIGINT ARRAY,
+    button_msg TEXT ARRAY
+);

@@ -12,24 +12,6 @@ os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 os.environ['JISHAKU_RETAIN'] = "True"
 os.environ['JISHAKU_FORCE_PAGINATOR'] = "True"
 
-# cog list
-coglist = [
-    'cogs.config',
-    'cogs.entertainment',
-    'cogs.info',
-    'cogs.leveling',
-    'cogs.moderation',
-    'cogs.owner',
-    'cogs.rtfm',
-    'cogs.utils',
-    'events.guild_events',
-    'events.level',
-    'events.on_error',
-    'events.starboard',
-    'events.timers',
-    'jishaku'
-]
-
 
 class Stancil(commands.Bot):
     db: asyncpg.Pool
@@ -44,6 +26,25 @@ class Stancil(commands.Bot):
             activity=discord.Game(name="s!help"),
         )
 
+        # cog list
+        self.coglist = [
+            'cogs.config',
+            'cogs.entertainment',
+            'cogs.info',
+            'cogs.leveling',
+            'cogs.moderation',
+            'cogs.owner',
+            'cogs.rtfm',
+            'cogs.utils',
+            'events.guild_events',
+            'events.level',
+            'events.on_error',
+            'events.role',
+            'events.starboard',
+            'events.timers',
+            'jishaku'
+        ]
+
     @property
     def invite(self):
         return "https://discord.com/oauth2/authorize?client_id=1101829281765654528&permissions=8&scope=bot%20applications.commands"
@@ -56,7 +57,7 @@ class Stancil(commands.Bot):
         self.session = aiohttp.ClientSession()
 
         # loading cogs
-        for ext in coglist:
+        for ext in self.coglist:
             try:
                 await self.load_extension(ext)
                 print(f"{ext} loaded")

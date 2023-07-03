@@ -41,23 +41,7 @@ class Owner(commands.Cog):
         """Reload a cog"""
         try:
             if cog == "all":
-                coglist = [
-                    'cogs.config',
-                    'cogs.entertainment',
-                    'cogs.info',
-                    'cogs.leveling',
-                    'cogs.moderation',
-                    'cogs.owner',
-                    'cogs.rtfm',
-                    'cogs.utils',
-                    'events.guild_events',
-                    'events.level',
-                    'events.on_error',
-                    'events.starboard',
-                    'events.timers',
-                    'jishaku'
-                ]
-                for ext in coglist:
+                for ext in self.bot.coglist:
                     await self.bot.reload_extension(ext)
             else:
                 await self.bot.reload_extension(cog)

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from core import Stancil
+import inspect
 
 
 def has_config_role():
@@ -175,14 +176,16 @@ class Configuration(commands.Cog):
     @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
     async def level_disable(self, ctx: commands.Context):
         """Disable leveling"""
-        await self.bot.db.execute(
+        s1 = await self.bot.db.execute(
             "DELETE FROM level_config WHERE guild=$1",
             ctx.guild.id
         )
-        await self.bot.db.execute(
+        s2 = await self.bot.db.execute(
             "DELETE FROM leveling WHERE guild=$1",
             ctx.guild.id
         )
+        if s1 and s2 == 'DELETE 0':
+            return await ctx.send("Level Not Enabled in this server")
         await ctx.send("Leveling is now disabled in this server")
 
     @level.command(name="xp")
@@ -321,6 +324,93 @@ class Configuration(commands.Cog):
         )
         await ctx.send(f"{channel.mention} successfully unignored from the level system")
 
+    @commands.group(invoke_without_command=True, case_insensitive=True)
+    async def role(self, ctx: commands.Context):
+        """Configure reaction or button(comming soon) roles"""
+        await ctx.send_help(ctx.command)
+
+    @role.group(invoke_without_command=True, case_insensitive=True)
+    async def reaction(self, ctx: commands.Context):
+        """Commands to config reaction roles"""
+        await ctx.send_help(ctx.command)
+
+    @reaction.command(name="create")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_roles=True))
+    async def reaction_create(self, ctx: commands.Context):
+        """Create a reaction role"""
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        msg = await ctx.send("Hello there. Which channel would you like the reaction role message to be in?")
+        channel_value = await self.bot.wait_for('message', check=check)
+
+        try:
+            channel_id = int(channel_value.content[2:-1])
+        except ValueError:
+            await ctx.channel.purge(limit=1)
+            await msg.edit(
+                content=f'Setup crash because you failed to mention the channel correctly. Please do it like this: {ctx.channel.mention}'
+            )
+            return
+        channel = self.bot.get_channel(channel_id)
+
+        await msg.edit(content=f"Alright, the message will be sent to {channel.mention}.\nNow let's setup the embed message. What will be the title of the embed?")
+        embed_title = await self.bot.wait_for('message', check=check)
+        embed = discord.Embed(title=embed_title).set_footer(text="This is what the embed will look like")
+        await ctx.channel.purge(limit=1)
+
+        await msg.edit(content="What will be the embed description", embed=embed)
+        embed_desc = await self.bot.wait_for('message', check=check)
+        embed.description = embed_desc
+        await ctx.channel.purge(limit=1)
+
+        await msg.edit(content="What will be the embed color (Hex color only. If you want no color, type `skip`)", embed=embed)
+        color_hex = await self.bot.wait_for('message', check=check)
+        if color_hex.lower() == "skip":
+            hex_val = 0
+        else:
+            hex_val = color_hex
+        embed.color = int(hex_val, 16)
+        await ctx.channel.purge(limit=1)
+
+        await msg.edit(content=inspect.cleandoc("""
+                        Nice, your embed message will look like this. Now it's time to add emojis and role
+                        Here's an example on how to format the emojis and role text
+                        ```:emoji 1: | @mention role here ; :emoji 2: | @another role here```
+                        You can add how many reaction roles you want
+                        """), embed=embed)
+        emoji_roles = await self.bot.wait_for('message', check=check)
+        cells = emoji_roles.content.split(";")
+        emojis = []
+        roles = []
+        for cell in cells:
+            divider = cell.split("|")
+            emojis.append(divider[0].strip())
+            roles.append(int(divider[1].strip()[3:-1]))
+
+        await ctx.channel.purge(limit=1)
+        reaction_role_message = await channel.send(embed=embed)
+
+        await self.bot.db.execute(
+            """
+            INSERT INTO
+            role(message, guild, button, embed_title, embed_desc, emojis, roles)
+            VALUES($1, $2, $3, $4, $5, $6, $7)
+            """,
+            reaction_role_message.id,
+            ctx.guild.id,
+            False,
+            embed_title,
+            embed_desc,
+            emojis,
+            roles
+        )
+
+        for emoji in emojis:
+            await reaction_role_message.add_reaction(emoji)
+
+        await msg.edit(content="Setup complete. ")
+
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['sb'])
     async def starboard(self, ctx: commands.Context):
         """Configure starboard system for your server"""
@@ -406,14 +496,16 @@ class Configuration(commands.Cog):
     @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
     async def starboard_disable(self, ctx: commands.Context):
         """Disable starboard"""
-        await self.bot.db.execute(
+        s1 = await self.bot.db.execute(
             "DELETE FROM starboard_config WHERE guild=$1",
             ctx.guild.id
         )
-        await self.bot.db.execute(
+        s2 = await self.bot.db.execute(
             "DELETE FROM starboard_message WHERE guild=$1",
             ctx.guild.id
         )
+        if s1 and s2 == 'DELETE 0':
+            return await ctx.send("Starboard Not Enabled in this server")
         await ctx.send("Starboard is now disabled in this server")
 
     @starboard.command(name="channel")
@@ -449,8 +541,6 @@ class Configuration(commands.Cog):
     async def starboard_emoji(self, ctx: commands.Context, *, emoji):
         """Set custom emoji for starboard.
         If you want to use the default star emoji, type 'default'
-
-        Note that this does not work with server emojis
         """
         if emoji == "default":
             await self.bot.db.execute(

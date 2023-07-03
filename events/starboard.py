@@ -35,6 +35,9 @@ class Starboard(commands.Cog):
         if not self.bot.get_guild(payload.guild_id):
             return
 
+        if payload.member.bot:
+            return
+
         sb_config_data = await self.bot.db.fetchrow(
             "SELECT * FROM starboard_config WHERE guild=$1",
             payload.guild_id
@@ -112,6 +115,9 @@ class Starboard(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         if not self.bot.get_guild(payload.guild_id):
+            return
+
+        if payload.member.bot:
             return
 
         sb_config_data = await self.bot.db.fetchrow(
@@ -204,11 +210,13 @@ class Starboard(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload: discord.RawMessageUpdateEvent):
-        await self.bot.db.execute(
+        stats = await self.bot.db.execute(
             "DELETE FROM starboard_message WHERE message=$1 and guild=$2",
             payload.message_id,
             payload.guild_id
         )
+        if stats == 'DELETE 0':
+            return
 
 
 async def setup(bot: Stancil):

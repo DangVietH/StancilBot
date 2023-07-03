@@ -33,6 +33,7 @@ class Info(commands.Cog):
         """Show member avatar"""
         member = member or ctx.author
         embed = discord.Embed(title=member.name, color=member.color).set_image(url=member.display_avatar.url)
+        embed.set_footer(text=f"Requested by {ctx.author.display_name}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
     @commands.hybrid_command()
