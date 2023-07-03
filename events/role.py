@@ -9,8 +9,6 @@ class Role(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        if not self.bot.get_guild(payload.guild_id):
-            return
         if payload.member.bot:
             return
 
@@ -24,7 +22,7 @@ class Role(commands.Cog):
             return
 
         emojis = await self.bot.db.fetchval(
-                "SELECT emoji FROM role WHERE message=$1",
+                "SELECT emojis FROM role WHERE message=$1",
                 payload.message_id
         )
         roles = await self.bot.db.fetchval(
@@ -41,8 +39,6 @@ class Role(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
-        if not self.bot.get_guild(payload.guild_id):
-            return
         if payload.member.bot:
             return
 
@@ -56,7 +52,7 @@ class Role(commands.Cog):
             return
 
         emojis = await self.bot.db.fetchval(
-            "SELECT emoji FROM role WHERE message=$1",
+            "SELECT emojis FROM role WHERE message=$1",
             payload.message_id
         )
         roles = await self.bot.db.fetchval(
