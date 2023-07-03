@@ -401,8 +401,8 @@ class Configuration(commands.Cog):
             reaction_role_message.id,
             ctx.guild.id,
             False,
-            embed_title,
-            embed_desc,
+            embed_title.content,
+            embed_desc.content,
             emojis,
             roles
         )
