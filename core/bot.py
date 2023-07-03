@@ -34,7 +34,6 @@ class Stancil(commands.Bot):
             'cogs.leveling',
             'cogs.moderation',
             'cogs.owner',
-            'cogs.rtfm',
             'cogs.utils',
             'events.guild_events',
             'events.level',
