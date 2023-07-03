@@ -98,3 +98,7 @@ class Level(commands.Cog):
                     role = message.guild.get_role(int(role_id[i]))
                     await message.author.add_roles(role)
                     await channel.send(f"{message.author.mention} also receive `{role.name}` role")
+
+
+async def setup(bot: Stancil):
+    await bot.add_cog(Level(bot))

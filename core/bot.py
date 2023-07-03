@@ -1,10 +1,9 @@
 import discord
-from discord.ext import commands, ipc
+from discord.ext import commands
 import os
 import asyncpg
 import aiohttp
 import re
-from utilities import config_var
 
 # jishaku configs
 os.environ["JISHAKU_HIDE"] = "True"
@@ -37,17 +36,14 @@ class Stancil(commands.Bot):
             'cogs.owner',
             'cogs.rtfm',
             'cogs.utils',
-            'events.guild',
+            'events.guild_events',
+            'events.level',
             'events.on_error',
+            'events.role',
+            'events.starboard',
             'events.timers',
             'jishaku'
         ]
-
-        self.ipc = ipc.Server(self,
-                              secret_key=config_var['ipc_key'],
-                              host=config_var['ipc_host'],
-                              standard_port=config_var['ipc_port'],
-                              )
 
     @property
     def invite(self):
@@ -59,7 +55,6 @@ class Stancil(commands.Bot):
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
-        await self.ipc.start()
 
         # loading cogs
         for ext in self.coglist:
