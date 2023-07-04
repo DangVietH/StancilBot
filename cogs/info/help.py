@@ -86,7 +86,7 @@ class FrontPageSource(menus.PageSource):
             embed.add_field(
                 name='Information',
                 value=(
-                        f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
+                        f"Hi, I'm a discord bot made by dvh69! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
                         "I have features such as starboard, moderation, leveling, and more!\n"
                         f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n"
                         "Go to the next page to learn about the bot signature (it's pretty simple)"
