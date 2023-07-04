@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from core import Stancil
 import inspect
+from utilities import time_converter
 
 
 def has_config_role():
@@ -586,6 +587,24 @@ class Configuration(commands.Cog):
                 ctx.guild.id
             )
             await msg.edit(content=f"Self Star disabled", view=None)
+
+    @starboard.command(name="expire")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
+    async def expire(self, ctx: commands.Context, expire_date):
+        """Set expire date for every starboard message. Time format includes: s, m, h, d"""
+
+        converted_time = time_converter(expire_date)
+        if converted_time == -1:
+            return await ctx.send("You didn't format the time correctly. Example of a correct one: `4h`")
+        if converted_time == -2:
+            return await ctx.send("Time must be an integer. Example of a correct one: `4h`")
+
+        await self.bot.db.execute(
+            "UPDATE starboard_config SET expire = $1 WHERE guild = $2",
+            converted_time,
+            ctx.guild.id
+        )
+        await ctx.send(f"Setup complete. Every starboard message from now on will expire in {expire_date}.\n**THIS DOES NOT MEAN THE MESSAGE IN THE STARBOARD CHANNEL WILL DELETE ITSELF**")
 
     @starboard.command(name="nsfw")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
