@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS starboard_config (
     self_star BOOL,
     lock BOOL,
     nsfw BOOL,
-    ignore_channel BIGINT ARRAY
+    ignore_channel BIGINT ARRAY,
+    expire INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS starboard_message (
@@ -65,7 +66,8 @@ CREATE TABLE IF NOT EXISTS starboard_message (
     channel BIGINT,
     sb_message BIGINT,
     guild BIGINT,
-    amount INTEGER
+    amount INTEGER,
+    expire TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS role (
@@ -74,6 +76,7 @@ CREATE TABLE IF NOT EXISTS role (
     button BOOL,
     embed_title TEXT,
     embed_desc TEXT,
+    embed_color INTEGER,
     emojis TEXT ARRAY,
     roles BIGINT ARRAY,
     button_msg TEXT ARRAY

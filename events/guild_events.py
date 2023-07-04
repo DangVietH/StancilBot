@@ -44,6 +44,10 @@ class GuildEvents(commands.Cog):
             "DELETE FROM starboard_message WHERE guild=$1",
             guild.id
         )
+        await self.bot.db.execute(
+            "DELETE FROM role WHERE guild=$1",
+            guild.id
+        )
 
 
 async def setup(bot: Stancil):

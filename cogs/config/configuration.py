@@ -367,19 +367,19 @@ class Configuration(commands.Cog):
         embed.description = desc
         await ctx.channel.purge(limit=1)
 
-        await msg.edit(content="What will be the embed color (Hex color only. If you want no color, type `skip`)", embed=embed)
+        await msg.edit(content="What will be the embed color (Hex color like this `0x2F3136`. If you want no color, type `skip`)", embed=embed)
         color_hex = await self.bot.wait_for('message', check=check)
         if color_hex.content.lower() == "skip":
-            hex_val = 0
+            hex_val = None
         else:
-            hex_val = int(color_hex, 16)
+            hex_val = int(color_hex.content, 16)
         embed.color = hex_val
         await ctx.channel.purge(limit=1)
 
         await msg.edit(content=inspect.cleandoc("""
                         Nice, your embed message will look like this. Now it's time to add emojis and role
                         Here's an example on how to format the emojis and role text
-                        ```:emoji 1: | @mention role here ; :emoji 2: | @another role here```
+                        ```:emoji 1: | @mention role here ; :emoji 2: | @mention another role here```
                         You can add how many reaction roles you want
                         """), embed=embed)
         emoji_roles = await self.bot.wait_for('message', check=check)
@@ -397,14 +397,15 @@ class Configuration(commands.Cog):
         await self.bot.db.execute(
             """
             INSERT INTO
-            role(message, guild, button, embed_title, embed_desc, emojis, roles)
-            VALUES($1, $2, $3, $4, $5, $6, $7)
+            role(message, guild, button, embed_title, embed_desc, embed_color, emojis, roles)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
             """,
             reaction_role_message.id,
             ctx.guild.id,
             False,
             title,
             desc,
+            hex_val,
             emojis,
             roles
         )
@@ -412,7 +413,75 @@ class Configuration(commands.Cog):
         for emoji in emojis:
             await reaction_role_message.add_reaction(emoji)
 
-        await msg.edit(content="Setup complete. ")
+        await msg.edit(content=f"Setup complete. Go to {channel.mention} to see the reaction message.", embed=None)
+
+    @reaction.command(name="edit")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
+    async def reaction_edit(self, ctx: commands.Context, message_id: discord.Message):
+        """Edit a reaction role message embed"""
+
+        data = await self.bot.db.fetchrow("SELECT * FROM role WHERE message=$1", message_id.id)
+        if not data:
+            return await ctx.send("This message is not a reaction role message!")
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        msg = await ctx.send("Hello there. Would you like to edit the title ,description or color?")
+        choice = await self.bot.wait_for('message', check=check)
+
+        embed = discord.Embed()
+        if choice.lower() == "title":
+            await msg.edit(content="Alright. What will be the new title?")
+            title = await self.bot.wait_for('message', check=check)
+            embed.title = title.content
+            embed.description = data['embed_desc']
+            embed.color = data['embed_color']
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_title = $1
+                WHERE message = $2
+                """,
+                title.content,
+                message_id.id
+            )
+        elif choice.lower() == "description":
+            await msg.edit(content="Alright. What will be the new description?")
+            desc = await self.bot.wait_for('message', check=check)
+            embed.description = desc.content
+            embed.title = data['embed_title']
+            embed.color = data['embed_color']
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_desc = $1
+                WHERE message = $2
+                """,
+                desc.content,
+                message_id.id
+            )
+        elif choice.lower() == "color":
+            await msg.edit(content="Alright. What will be the new embed color? (Hex color like this `0x2F3136`)")
+            color = await self.bot.wait_for('message', check=check)
+            color_hex = int(color.content, 16)
+            embed.title = data['embed_title']
+            embed.description = data['embed_desc']
+            embed.color = color_hex
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_color = $1
+                WHERE message = $2
+                """,
+                color_hex,
+                message_id.id
+            )
+        else:
+            return await msg.edit(content="Editor crash because invalid option. The only valid ones are `title`, 'description' and 'color'")
+
+        await message_id.edit(embed=embed)
+        await msg.edit(content="Editing finish")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['sb'])
     async def starboard(self, ctx: commands.Context):

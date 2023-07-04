@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from core import Stancil
+import datetime
 
 
 # starboard embed generator
@@ -59,7 +60,7 @@ class Starboard(commands.Cog):
         if str(payload.emoji) != emoji:
             return
 
-        if sb_config_data['lock'] is True:
+        if sb_config_data['lock']:
             return
         if channel.id == sb_channel.id:
             return
@@ -85,16 +86,19 @@ class Starboard(commands.Cog):
                         f"{emoji} **{len(react)} |** {channel.mention}",
                         embed=sb_embed_generator(message)
                     )
+                    expire = sb_config_data['expire'] or 604800  # one week
+                    expire_time = datetime.datetime.now() + datetime.timedelta(seconds=expire)
                     await self.bot.db.execute(
                         """
-                        INSERT INTO starboard_message(message, channel, sb_message, guild, amount)
-                        VALUES($1, $2, $3, $4, $5)
+                        INSERT INTO starboard_message(message, channel, sb_message, guild, amount, expire)
+                        VALUES($1, $2, $3, $4, $5, $6)
                         """,
                         payload.message_id,
                         payload.channel_id,
                         new_star_message.id,
                         payload.guild_id,
-                        len(react)
+                        len(react),
+                        expire_time
                     )
                 else:
                     sb_message = await sb_channel.fetch_message(message_stats['sb_message'])
@@ -138,7 +142,7 @@ class Starboard(commands.Cog):
         if str(payload.emoji) != emoji:
             return
 
-        if sb_config_data['lock'] is True:
+        if sb_config_data['lock']:
             return
         if channel.id == sb_channel.id:
             return
