@@ -78,7 +78,7 @@ class FrontPageSource(menus.PageSource):
 
         embed.add_field(
             name='Support Server',
-            value='For more help, consider joining the support server at https://discord.gg/wait',
+            value=f'For more help, consider joining the support server at {menu.ctx.bot.support_server}',
             inline=False,
         )
 
