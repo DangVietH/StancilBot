@@ -398,10 +398,11 @@ class Configuration(commands.Cog):
         await self.bot.db.execute(
             """
             INSERT INTO
-            role(message, guild, button, embed_title, embed_desc, embed_color, emojis, roles)
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+            role(message, channel, guild, button, embed_title, embed_desc, embed_color, emojis, roles)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
             """,
             reaction_role_message.id,
+            channel.id,
             ctx.guild.id,
             False,
             title,
@@ -415,6 +416,77 @@ class Configuration(commands.Cog):
             await reaction_role_message.add_reaction(emoji)
 
         await msg.edit(content=f"Setup complete. Go to {channel.mention} to see the reaction message.", embed=None)
+
+    @reaction.command(name="edit")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
+    async def reaction_edit(self, ctx: commands.Context, message_id: int):
+        """Edit a reaction role message embed"""
+
+        data = await self.bot.db.fetchrow("SELECT * FROM role WHERE message=$1", message_id)
+        if not data:
+            return await ctx.send("This message is not a reaction role message!")
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        msg = await ctx.send("Hello there. Would you like to edit the title ,description or color?")
+        choice = await self.bot.wait_for('message', check=check)
+
+        embed = discord.Embed()
+        if choice.lower() == "title":
+            await msg.edit(content="Alright. What will be the new title?")
+            title = await self.bot.wait_for('message', check=check)
+            embed.title = title.content
+            embed.description = data['embed_desc']
+            embed.color = data['embed_color']
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_title = $1
+                WHERE message = $2
+                """,
+                title.content,
+                message_id.id
+            )
+        elif choice.lower() == "description":
+            await msg.edit(content="Alright. What will be the new description?")
+            desc = await self.bot.wait_for('message', check=check)
+            embed.description = desc.content
+            embed.title = data['embed_title']
+            embed.color = data['embed_color']
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_desc = $1
+                WHERE message = $2
+                """,
+                desc.content,
+                message_id.id
+            )
+        elif choice.lower() == "color":
+            await msg.edit(content="Alright. What will be the new embed color? (Hex color like this `0x2F3136`)")
+            color = await self.bot.wait_for('message', check=check)
+            color_hex = int(color.content, 16)
+            embed.title = data['embed_title']
+            embed.description = data['embed_desc']
+            embed.color = color_hex
+            await self.bot.db.execute(
+                """
+                UPDATE role
+                SET embed_color = $1
+                WHERE message = $2
+                """,
+                color_hex,
+                message_id.id
+            )
+        else:
+            return await msg.edit(
+                content="Editor crash because invalid option. The only valid ones are `title`, `description` and `color`")
+
+        channel = self.bot.get_channel(data['channel'])
+        message = await channel.fetch_message(message_id)
+        await message.edit(embed=embed)
+        await msg.edit(content="Editing finish")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, aliases=['sb'])
     async def starboard(self, ctx: commands.Context):
@@ -630,6 +702,31 @@ class Configuration(commands.Cog):
                 ctx.guild.id
             )
             await msg.edit(content=f"NSFW disabled", view=None)
+
+    @starboard.command(name="lock")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_guild=True))
+    async def starboard_lock(self, ctx: commands.Context):
+        """Locking starboard"""
+        view = Confirm(ctx)
+        msg = await ctx.send("Do you want to lock starboard?", view=view)
+
+        await view.wait()
+        if view.value is None:
+            await msg.edit(content="You take too long to respond!", view=None)
+        elif view.value:
+            await self.bot.db.execute(
+                "UPDATE starboard_config SET lock = $1 WHERE guild = $2",
+                True,
+                ctx.guild.id
+            )
+            await msg.edit(content=f"Starboard locked", view=None)
+        else:
+            await self.bot.db.execute(
+                "UPDATE starboard_config SET lock = $1 WHERE guild = $2",
+                False,
+                ctx.guild.id
+            )
+            await msg.edit(content=f"Starboard unlock", view=None)
 
     @starboard.command(name="ignore-channel")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_channels=True))

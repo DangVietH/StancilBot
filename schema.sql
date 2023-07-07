@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS starboard_message (
 
 CREATE TABLE IF NOT EXISTS role (
     message BIGINT PRIMARY KEY,
+    channel BIGINT,
     guild BIGINT,
     button BOOL,
     embed_title TEXT,
