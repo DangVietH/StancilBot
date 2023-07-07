@@ -433,7 +433,7 @@ class Configuration(commands.Cog):
         choice = await self.bot.wait_for('message', check=check)
 
         embed = discord.Embed()
-        if choice.lower() == "title":
+        if choice.content.lower() == "title":
             await msg.edit(content="Alright. What will be the new title?")
             title = await self.bot.wait_for('message', check=check)
             embed.title = title.content
@@ -448,7 +448,7 @@ class Configuration(commands.Cog):
                 title.content,
                 message_id
             )
-        elif choice.lower() == "description":
+        elif choice.content.lower() == "description":
             await msg.edit(content="Alright. What will be the new description?")
             desc = await self.bot.wait_for('message', check=check)
             embed.description = desc.content
@@ -463,7 +463,7 @@ class Configuration(commands.Cog):
                 desc.content,
                 message_id
             )
-        elif choice.lower() == "color":
+        elif choice.content.lower() == "color":
             await msg.edit(content="Alright. What will be the new embed color? (Hex color like this `0x2F3136`)")
             color = await self.bot.wait_for('message', check=check)
             color_hex = int(color.content, 16)
