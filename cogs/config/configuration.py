@@ -434,6 +434,7 @@ class Configuration(commands.Cog):
 
         embed = discord.Embed()
         if choice.content.lower() == "title":
+            await ctx.channel.purge(limit=1)
             await msg.edit(content="Alright. What will be the new title?")
             title = await self.bot.wait_for('message', check=check)
             embed.title = title.content
@@ -449,6 +450,7 @@ class Configuration(commands.Cog):
                 message_id
             )
         elif choice.content.lower() == "description":
+            await ctx.channel.purge(limit=1)
             await msg.edit(content="Alright. What will be the new description?")
             desc = await self.bot.wait_for('message', check=check)
             embed.description = desc.content
@@ -464,6 +466,7 @@ class Configuration(commands.Cog):
                 message_id
             )
         elif choice.content.lower() == "color":
+            await ctx.channel.purge(limit=1)
             await msg.edit(content="Alright. What will be the new embed color? (Hex color like this `0x2F3136`)")
             color = await self.bot.wait_for('message', check=check)
             color_hex = int(color.content, 16)
@@ -480,8 +483,10 @@ class Configuration(commands.Cog):
                 message_id
             )
         else:
+            await ctx.channel.purge(limit=1)
             return await msg.edit(
                 content="Editor crash because invalid option. The only valid ones are `title`, `description` and `color`")
+        await ctx.channel.purge(limit=1)
 
         channel = self.bot.get_channel(data['channel'])
         message = await channel.fetch_message(message_id)
