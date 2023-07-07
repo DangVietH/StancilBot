@@ -446,7 +446,7 @@ class Configuration(commands.Cog):
                 WHERE message = $2
                 """,
                 title.content,
-                message_id.id
+                message_id
             )
         elif choice.lower() == "description":
             await msg.edit(content="Alright. What will be the new description?")
@@ -461,7 +461,7 @@ class Configuration(commands.Cog):
                 WHERE message = $2
                 """,
                 desc.content,
-                message_id.id
+                message_id
             )
         elif choice.lower() == "color":
             await msg.edit(content="Alright. What will be the new embed color? (Hex color like this `0x2F3136`)")
@@ -477,7 +477,7 @@ class Configuration(commands.Cog):
                 WHERE message = $2
                 """,
                 color_hex,
-                message_id.id
+                message_id
             )
         else:
             return await msg.edit(
