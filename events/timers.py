@@ -37,5 +37,6 @@ class Timers(commands.Cog):
                     starboard['message']
                 )
 
+
 async def setup(bot: Stancil):
     await bot.add_cog(Timers(bot))

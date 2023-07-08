@@ -52,8 +52,7 @@ class Moderation(commands.Cog):
             return await ctx.send("You didn't format the time correctly. Example of a correct one: `4h`")
         if converted_time == -2:
             return await ctx.send("Time must be an integer. Example of a correct one: `4h`")
-        duration = datetime.timedelta(minutes=converted_time)
-        await member.timeout(duration, reason=reason)
+        await member.timeout(converted_time, reason=reason)
 
         await member.send(f"You were timeout in **{ctx.guild.name}** for **{reason}**")
         await ctx.send(f"Successfully timeout {member.mention} for `{reason}`")

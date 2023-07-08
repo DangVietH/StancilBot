@@ -79,7 +79,7 @@ class Image(commands.Cog):
         resp = await self.bot.session.get(
             f"https://some-random-api.com/canvas/youtube-comment", params={
                 "avatar": ctx.author.display_avatar.url,
-                "username": ctx.author.name,
+                "username": ctx.author.display_name,
                 "comment": comment
             }
         )
