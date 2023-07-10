@@ -393,6 +393,7 @@ class Configuration(commands.Cog):
             roles.append(int(divider[1].strip()[3:-1]))
 
         await ctx.channel.purge(limit=1)
+        embed.remove_footer()
         reaction_role_message = await channel.send(embed=embed)
 
         await self.bot.db.execute(
@@ -416,6 +417,65 @@ class Configuration(commands.Cog):
             await reaction_role_message.add_reaction(emoji)
 
         await msg.edit(content=f"Setup complete. Go to {channel.mention} to see the reaction message.", embed=None)
+
+    @reaction.command(name="add")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
+    async def reaction_add(self, ctx: commands.Context, message_id: int, emoji, role: discord.Role):
+        """Add more emojis to a reaction role message"""
+        data = await self.bot.db.fetchrow("SELECT * FROM role WHERE message=$1", message_id)
+        if not data:
+            return await ctx.send("This message is not a reaction role message!")
+        channel = self.bot.get_channel(data['channel'])
+        message = await channel.fetch_message(message_id)
+        await message.add_reaction(emoji)
+        await self.bot.db.execute(
+            "UPDATE role SET emojis = ARRAY_APPEND(emojis, $1) WHERE message = $2",
+            emoji,
+            message_id
+        )
+        await self.bot.db.execute(
+            "UPDATE role SET roles = ARRAY_APPEND(roles, $1) WHERE message = $2",
+            role.id,
+            message_id
+        )
+        await ctx.message.add_reaction("✅")
+
+    @reaction.command(name="remove")
+    @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
+    async def reaction_remove(self, ctx: commands.Context, message_id: int, emoji):
+        """Remove emoji from a reaction role message"""
+        data = await self.bot.db.fetchrow("SELECT * FROM role WHERE message=$1", message_id)
+        if not data:
+            return await ctx.send("This message is not a reaction role message!")
+        channel = self.bot.get_channel(data['channel'])
+        message = await channel.fetch_message(message_id)
+
+        emojis = await self.bot.db.fetchval(
+            "SELECT role_level FROM level_config WHERE guild = $1",
+            ctx.guild.id
+        )
+        roles = await self.bot.db.fetchval(
+            "SELECT role_id FROM level_config WHERE guild = $1",
+            ctx.guild.id
+        )
+        role_id = 0
+
+        for i in range(len(roles)):
+            if emoji == int(emojis[i]):
+                role_id = roles[i]
+
+        await message.clear_reaction(emoji)
+        await self.bot.db.execute(
+            "UPDATE role SET emojis = ARRAY_REMOVE(emojis, $1) WHERE message = $2",
+            emoji,
+            message_id
+        )
+        await self.bot.db.execute(
+            "UPDATE role SET roles = ARRAY_REMOVE(roles, $1) WHERE message = $2",
+            role_id,
+            message_id
+        )
+        await ctx.message.add_reaction("✅")
 
     @reaction.command(name="edit")
     @commands.check_any(has_config_role(), commands.has_permissions(manage_messages=True))
